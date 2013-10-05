@@ -1,0 +1,318 @@
+/* app.styl */
+
+// todo: split this out a bit
+//     : non-webkit scrollbars (not a huge deal)
+
+// fonts
+// - helper
+fontsq(name, filename, weight)
+  @font-face
+    font-family name
+    src url(filename + '.eot')
+    src url(filename + '.eot?#iefix') format('embedded-opentype'),
+      url(filename + '.woff') format('woff'),
+      url(filename + '.ttf') format('truetype')
+    font-weight weight
+// - Orbitron (subsetted)
+fontsq('Orbitron', 'orbitron', 400)
+// - Josefin Sans 400
+fontsq('Josefin Sans', 'josefinsans400', 400)
+// - Josefin Sans 700
+fontsq('Josefin Sans', 'josefinsans700', 700)
+
+// colors - simple compound scheme from kuler
+anti_light = #FFD6C4
+anti_dark = #CC6855
+cong_light = #84EEFF
+cong_mid = #557DCC
+cong_dark = #124099
+text = darken(desaturate(anti_dark, 80%), 60%)
+body_bg = #fcfcff
+header_bg = lighten(desaturate(anti_light, 60%), 40%)
+input_border = desaturate(lighten(cong_dark, 85%), 10%)
+input_bg = lighten(cong_light, 80%)
+input_bg_toggle = lighten(input_border, 20%)
+verb_toggle = lighten(desaturate(cong_mid, 80%), 20%)
+
+// overall
+body
+  background darken(desaturate(body_bg, 80%), 5%)
+  font-family: Josefin Sans, sans-serif
+  font-size 16px
+  line-height 1
+  color text
+  @media all and (min-width: 960px)
+    font-size 18px
+
+.row
+  max-width 40em
+  margin 0 auto
+  background body_bg
+
+address
+  display none
+
+.verb
+  color cong_mid
+
+.verb:hover
+  color lighten(cong_mid, 25%)
+
+.clearfix
+  zoom 1
+  &:before, &:after
+    content ''
+    display table
+  &:after
+    clear both
+
+a, a:visited, a:hover
+  text-decoration none
+
+input[type=text], input[type=password]
+  border-radius 0
+  -webkit-appearance none
+  border 1px solid input_border
+  background input_bg_toggle
+  outline none
+  text-shadow header_bg 0 0 2px
+  font-weight 600 // ?
+  &:focus
+    box-shadow 0 0 4px lighten(input_border, 20%)
+    background input_bg
+
+// topbar section
+header
+  background header_bg
+  padding 0.25em 0 0 0
+  position relative
+
+  .row
+    background header_bg
+
+  h3.brand
+    display inline
+    font-family Orbitron, sans-serif
+    font-weight 400
+    font-size 1.5em
+    margin 0 0 0 0.5em
+
+  .account
+    float right
+    font-weight 600
+    margin 0.25em 0.5em 0.75em 0
+    display inline-block
+    .quarters
+      display inline-block
+      margin 0 0.5em 0 0
+
+// playback section
+.playback
+  font-weight 600
+
+  a.song
+    font-size 1.5em
+    font-weight 400
+    display block
+    margin 0 0.5em
+    padding 0.5em 0
+
+    .artist // sc is 60% from black, 40%(?) from their text
+      color lighten(text, 60%)
+      font-size (7/8)em
+    .title
+      color darken(text, 20%)
+      height 2em
+      overflow hidden
+      text-overflow clip
+    &:hover>.title
+        color cong_mid
+
+  mute_width = 4em
+  .mute
+    width mute_width
+    height 2em
+    float left
+    display inline-block
+    line-height 2
+    text-align center
+    border 1px solid input_border
+    background input_bg
+    margin 0 0 0.5em 0.5em
+
+  .progress
+    margin 0 0.5em 0.5em mute_width + 1em
+    height 2em
+    padding 1px
+    position relative
+    background white
+
+    border_color = lighten(cong_dark, 60%)
+    indicator_color_1 = lighten(cong_dark, 90%)
+    indicator_color_2 = lighten(cong_dark, 85%)
+    .bracket
+      display inline-block
+      width 1em
+      height 2em
+      margin -1px
+      border 1px solid input_border
+      z-index 10
+
+      &.left
+        float left
+        border-width 1px 0 1px 1px
+      &.right
+        float right
+        border-width 1px 1px 1px 0
+
+    .indicator
+      height 2em
+      position absolute
+      top 1px
+      width 68.2152%
+      // ie fallback
+      background indicator_color_2
+      // stripes!
+      // ew, but the nib mixin for vendorizing this isn't working
+      background -webkit-repeating-linear-gradient(-30deg,
+        indicator_color_1 0,
+        indicator_color_1 2em,
+        indicator_color_2 2em,
+        indicator_color_2 4em)
+      background repeating-linear-gradient(-60deg,
+        indicator_color_1 0,
+        indicator_color_1 2em,
+        indicator_color_2 2em,
+        indicator_color_2 4em)
+      z-index 1
+
+    .status
+      margin 0
+      p
+        z-index 2
+        margin 1px 0
+        display inline-block
+        width 5em
+        height 2em
+        line-height 2
+        color darken(text, 50%)
+        font-weight 400
+        text-shadow header_bg 0 0 2px
+        position absolute
+        &.elapsed
+          right 50%
+          text-align right
+          margin-right 0.5em
+        &.total
+          left 50%
+          text-align left
+          // a teensy bit hacky, but hey this is css
+          // the purpose of this is to keep the total time still
+          margin-left -0.2em
+          &:before
+            content: '/ '
+
+  .engage
+    a
+      display inline-block
+      margin 0 0 0.5em 0.5em
+      border 1px solid input_border
+      background input_bg
+      padding 0.55em
+      min-width 8em
+      text-align center
+    p
+      margin 0
+    .queue
+      display inline-block
+      float right
+      margin 0 0.5em 0 0
+
+  .engage a.toggle,
+  .mute.toggle
+    background input_bg_toggle
+    .verb
+      color verb_toggle
+
+
+// chat section
+.chat
+  .list
+    margin 0 0.5em 0 0.5em
+    min-height (11 + 11/16)em // ~=iphone 5; script this proper
+    max-height 20em
+    overflow hidden
+    overflow-y scroll
+    -webkit-overflow-scrolling touch
+    background-color darken(body_bg, 1.25%)
+    color darken(text, 50%)
+    &::scrollbar
+      width 0
+      height 0
+    &::-webkit-scrollbar
+      width 0
+      height 0
+    p
+      margin 0
+      margin-left (9/16)em
+      line-height 1.25
+      text-indent -0.5em
+      user
+        margin 0 0.25em 0 0
+        color lighten(text, 50%)
+        font-weight 600
+        &:after
+          content ':'
+    .spacer
+      height 100%
+  .input
+    margin 0 0.5em 0 0.5em
+    padding 0.25em 5px 0.5em 5px
+    input[type=text]
+      width 100%
+      padding 0 4px
+      // because fuck you that's why
+      margin -1px 0 0 -5px
+
+// modal section
+.modal
+  visibility hidden
+  font-size 1.25em
+  background-color rgba(header_bg, 0.9)
+  z-index 3
+  padding-top 0.5em
+  position fixed
+  top 0
+  left 0
+  right 0
+  bottom 0
+  .row
+    background-color transparent
+  .error
+    float right
+    color red
+  form
+    display block
+    margin 0 auto
+    padding 0.5em
+    background-color body_bg
+    max-width 10em
+    label
+      font-size 0.75em
+      margin-top 0.25em
+      display block
+    input
+      display block
+      width 100%
+      padding 0
+    input[type=submit]
+      margin 1em 0 0 1px
+      border 1px solid input_border
+      border-radius 0
+      line-height 1.5
+      font-weight 600
+      background input_bg
+      text-align center
+      &.toggle
+        background input_bg_toggle
+        color verb_toggle

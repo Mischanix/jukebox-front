@@ -1,0 +1,65 @@
+!!!
+html
+  head
+    meta(charset='utf-8')
+    meta(name='viewport',
+      content='width=device-width,initial-scale=1')
+    meta(name='apple-mobile-web-app-capable', content='yes')
+    link(rel='stylesheet', href='jukebox.css')
+    script(src='jukebox.js', async)
+  body
+    //- address.
+    //-   github, twitter @mischanix
+    article.app
+      header
+        .row.clearfix
+          h3.brand jukebox
+          .account
+            //- shorten to %d q if .toString 10 .length > 3
+            .quarters 379.2 q
+            //- just show 'logout' when logged in
+            a.verb login / register
+      section.playback
+        .row
+          a.song
+            .artist The Glitch Mob
+            .title Bassnectar - Heads Up (The Glitch Mob Remix) - Free DL
+        .row.clearfix
+          a.verb.mute unmute
+          .progress
+            .left.bracket
+            .right.bracket
+            .indicator
+            .status
+              p.elapsed 4.39
+              p.total 6.49
+        .row
+          .engage
+            p.verb.queue queue a song
+        .row
+          .engage
+            a.tip
+              p 1.6 quarters tipped
+              p.verb tip the queuer
+            a.skip.toggle
+              p 18% skip progress
+              p.verb vote to skip
+      section.chat
+        .row
+          .list
+            .spacer
+        .row
+          .input
+            form.chat-form
+              input(type='text')
+              input(type='submit', hidden)
+    article.modal
+      .row.clearfix
+        form.user-form
+          label
+            span nickname
+            span.error
+          input(type='text', name='nickname')
+          label password
+          input(type='password', name='password')
+          input(type='submit', value='login / register').verb

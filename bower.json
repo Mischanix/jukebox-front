@@ -1,0 +1,14 @@
+{
+  "name": "jukebox",
+  "version": "0.0.1",
+  "main": "public/j.js",
+  "dependencies": {
+    "console-polyfill": "*",
+    "HTML": "*",
+    "normalize-css": "*",
+    "computedStyle": "~0.1.3",
+    "eventEmitter": "~4.2.4",
+    "lodash": "~2.2.1"
+  },
+  "overrides": {}
+}
