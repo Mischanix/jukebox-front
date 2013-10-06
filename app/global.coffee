@@ -19,15 +19,15 @@ window.$ = HTML.query.bind HTML
     jukebox.on.apply jukebox, call
   jukebox.data = (name, val) ->
     evt = 'data.' + name
-    if _.isRegExp name
-      evt = new RegExp 'data.' + name.source
     if val?
       jukebox.removeEvent evt
       jukebox.on evt, (o) ->
         o[name] = val
-      jukebox.emit evt + '.changed', val
+      jukebox.emit 'changed.' + evt, val
       jukebox.data
     else
+      if _.isRegExp name
+        evt = new RegExp '^data.' + name.source
       result = {}
       jukebox.emit evt, result
       result[name] ? result

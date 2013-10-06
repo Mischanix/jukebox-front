@@ -125,7 +125,7 @@ jukebox.on 'ready', ->
 
   # account info ui
   $quarters = $ '.quarters'
-  jukebox.on 'data.user.quarters.changed', (val) ->
+  jukebox.on 'changed.data.user.quarters', (val) ->
     val = val.toString 10
     nominal = if val.length < 5 then 'quarters' else 'q'
     nominal = 'quarter' if val is '1'
@@ -133,7 +133,7 @@ jukebox.on 'ready', ->
     $quarters.innerText = val + ' ' + nominal
 
   $loginVerb = $ '.account a.verb'
-  jukebox.on 'data.user.fake.changed', (val) ->
+  jukebox.on 'changed.data.user.fake', (val) ->
     if val is true
       $loginVerb.innerText = 'login / register'
     if val is false
