@@ -19,16 +19,18 @@ window.$ = HTML.query.bind HTML
     jukebox.on.apply jukebox, call
   jukebox.data = (name, val) ->
     evt = 'data.' + name
+    if _.isRegExp name
+      evt = new RegExp 'data.' + name.source
     if val?
       jukebox.removeEvent evt
       jukebox.on evt, (o) ->
-        o.value = val
+        o[name] = val
       jukebox.emit evt + '.changed', val
       jukebox.data
     else
       result = {}
       jukebox.emit evt, result
-      result.value ? result
+      result[name] ? result
 
   for k, v of {
     'ws.url': 'ws://10.0.0.69:3343'
