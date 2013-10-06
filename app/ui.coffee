@@ -122,3 +122,20 @@ jukebox.on 'ready', ->
     ($ '.modal .error').innerText = msg
   jukebox.on 'login.error.hide', ->
     ($ '.modal .error').innerText = ''
+
+  # account info ui
+  $quarters = $ '.quarters'
+  jukebox.on 'data.user.quarters.changed', (val) ->
+    val = val.toString 10
+    nominal = if val.length < 5 then 'quarters' else 'q'
+    nominal = 'quarter' if val is '1'
+    val = 'no' if val is '0'
+    $quarters.innerText = val + ' ' + nominal
+
+  $loginVerb = $ '.account a.verb'
+  jukebox.on 'data.user.fake.changed', (val) ->
+    if val is true
+      $loginVerb = 'login / register'
+    if val is false
+      $loginVerb = 'logout'
+

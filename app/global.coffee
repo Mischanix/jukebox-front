@@ -22,14 +22,14 @@ window.$ = HTML.query.bind HTML
       jukebox.removeEvent evt
       jukebox.on evt, (o) ->
         o.value = val
+      jukebox.emit evt + '.changed', val
       jukebox.data
     else
       result = {}
       jukebox.emit evt, result
-      result.value or result
+      result.value ? result
 
   for k, v of {
-    'user': 'cat'
     'ws.url': 'ws://10.0.0.69:3343'
   } then jukebox.data k, v
   jukebox.emit 'ready'
