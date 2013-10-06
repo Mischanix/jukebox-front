@@ -1,12 +1,13 @@
 jukebox.on 'ready', ->
   ws = new WebSocket jukebox.data 'ws.url'
   jukebox.data 'ws.conn', ws
-  console.log ws
 
   jukebox.on 'net.send', (type, data) ->
     if not _.isString type
       throw 'net.send requires a type'
     data or= {}
+    if not _.isPlainObject data
+      throw 'net.send requires data be a plain object'
     data.type = type
     ws.send JSON.stringify data
 
