@@ -1,4 +1,6 @@
 jukebox.on 'connect', ->
+  closed = false
+  restarting = false
   jukebox.data 'ws.lastAttempt', Date.now()
   ws = new WebSocket jukebox.data 'ws.url'
   jukebox.data 'ws.conn', ws
@@ -17,22 +19,32 @@ jukebox.on 'connect', ->
     data = JSON.parse e.data
     type = data.type or 'unknown'
     jukebox.emit 'net.' + type, data
-  ws.addEventListener 'close', (e) ->
-    jukebox.removeEvent 'net.send'
-    console.log 'websocket closed'
-    jukebox.data 'ws.lastClosed', Date.now()
-    jukebox.emit 'chat.show', '', 'you were disconnected from the server'
-    delay = 100 # ms
-    if Date.now() - jukebox.data 'ws.lastAttempt' > 20*1000
-      jukebox.data 'ws.delay', 100
-    else
-      delay = jukebox.data 'ws.delay'
-      jukebox.data 'ws.delay', Math.min(delay * 2, 4*1000)
-    _.delay (->
-      jukebox.emit 'connect'), delay
+
+  jukebox.once 'net.reconnect', ->
+    restarting = true
+    ws.close()
+
   jukebox.once 'net.ready', ->
-    if _.isNumber jukebox.data 'ws.lastClosed'
-      jukebox.emit 'chat.show', '', 'you were reconnected to the server'
+    if true is jukebox.data 'ws.closed'
+      jukebox.emit 'notification', 'you were reconnected to the server'
+      jukebox.data 'ws.closed', false
+
+    ws.addEventListener 'close', (e) ->
+      jukebox.removeEvent 'net.send'
+      if not restarting
+        console.log 'websocket closed'
+        jukebox.data 'ws.closed', true
+        jukebox.emit 'notification', 'you were disconnected from the server'
+      else
+        restarting = false
+      delay = 100 # ms
+      if Date.now() - jukebox.data 'ws.lastAttempt' > 20*1000
+        jukebox.data 'ws.delay', 100
+      else
+        delay = jukebox.data 'ws.delay'
+        jukebox.data 'ws.delay', Math.min(delay * 2, 4*1000)
+      _.delay (->
+        jukebox.emit 'connect'), delay
     console.log 'net.ready'
 
 jukebox.on 'ready', ->

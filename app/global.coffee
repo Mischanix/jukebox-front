@@ -20,10 +20,12 @@ window.$ = HTML.query.bind HTML
   jukebox.data = (name, val) ->
     evt = 'data.' + name
     if val?
+      oldVal = jukebox.data name
       jukebox.removeEvent evt
       jukebox.on evt, (o) ->
         o[name] = val
-      jukebox.emit 'changed.' + evt, val
+      if oldVal isnt val
+        jukebox.emit 'changed.' + evt, val
       jukebox.data
     else
       if _.isRegExp name

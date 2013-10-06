@@ -120,6 +120,24 @@ header
     .artist // sc is 60% from black, 40%(?) from their text
       color lighten(text, 60%)
       font-size (7/8)em
+
+      background-repeat no-repeat
+      // phone
+      background-image url(cloud-phone.png)
+      padding-left 48px
+      // tablet
+      @media all and (min-width: 960px)
+        background-image url(cloud-tablet.png)
+        padding-left 55px
+      // phone@2x
+      @media all and (-webkit-min-device-pixel-ratio: 1.5)
+        background-image url(cloud-phone@2x.png)
+        background-size 44px 19px
+      // tablet@2x
+      @media all and (min-width: 960px) and (-webkit-min-device-pixel-ratio: 1.5)
+        background-image url(cloud-tablet@2x.png)
+        background-size 51px 22px
+
     .title
       color darken(text, 20%)
       height 2em
@@ -263,6 +281,9 @@ header
         font-weight 600
         &:after
           content ':'
+      notify
+        font-weight 600
+        color desaturate(lighten(anti_dark, 10%), 30%)
     .spacer
       height 100%
   .input

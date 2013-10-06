@@ -81,10 +81,11 @@ jukebox.on 'ready', ->
     $chatbox.value = ''
     e.preventDefault()
 
-  jukebox.on 'chat.show', (user, message) ->
+  jukebox.on 'chat.show', (user, message, notification) ->
     jukebox.emit 'template.chat_message', {
       user
       message
+      notification
     }, (str) ->
       $chatlist.insertAdjacentHTML 'beforeend', str
       updateChatList()
@@ -98,7 +99,10 @@ jukebox.on 'ready', ->
   $loginBtn = $ '.modal .verb'
   $login.addEventListener 'click', (e) ->
     e.preventDefault()
-    jukebox.emit 'login.show'
+    if true is jukebox.data 'user.fake'
+      jukebox.emit 'login.show'
+    else
+      jukebox.emit 'logout'
   $modal.addEventListener 'click', (e) ->
     if e.target is $modal or e.target is $modalRow
       jukebox.emit 'login.hide'
@@ -106,7 +110,7 @@ jukebox.on 'ready', ->
     e.preventDefault()
     nickname = ($ 'input[name=nickname]').value
     password = ($ 'input[name=password]').value
-    jukebox.emit 'login.perform', nickname, password
+    jukebox.emit 'login', nickname, password
 
   jukebox.on 'login.ping', _.debounce (->
     toggle $loginBtn
@@ -132,9 +136,11 @@ jukebox.on 'ready', ->
     val = 'no' if val is '0'
     $quarters.innerText = val + ' ' + nominal
 
-  $loginVerb = $ '.account a.verb'
   jukebox.on 'changed.data.user.fake', (val) ->
     if val is true
-      $loginVerb.innerText = 'login / register'
+      $login.innerText = 'login / register'
     if val is false
-      $loginVerb.innerText = 'logout'
+      $login.innerText = 'logout'
+
+  jukebox.on 'changed.data.user.nick', (nick) ->
+    $chatbox.placeholder = nick + ':'

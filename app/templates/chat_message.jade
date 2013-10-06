@@ -1,3 +1,6 @@
 p
-  user= user
-  = message
+  - if (notification)
+    notify= message
+  - else
+    user= user
+    = message
