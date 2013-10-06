@@ -6,3 +6,4 @@ jukebox.on 'net.ready', ->
     console.log 'storing session response...'
     localStorage.session = data.session
     localStorage.secret = data.secret
+    jukebox.emit 'net.send', 'session.updated'
