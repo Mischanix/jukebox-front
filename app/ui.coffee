@@ -138,4 +138,3 @@ jukebox.on 'ready', ->
       $loginVerb = 'login / register'
     if val is false
       $loginVerb = 'logout'
-

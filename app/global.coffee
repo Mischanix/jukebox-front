@@ -14,6 +14,7 @@ window.$ = HTML.query.bind HTML
 )(->
   calls = window.jukebox.on._calls or []
   window.jukebox = new EventEmitter
+  jukebox.setOnceReturnValue 'once'
   for call in calls
     jukebox.on.apply jukebox, call
   jukebox.data = (name, val) ->
