@@ -135,6 +135,6 @@ jukebox.on 'ready', ->
   $loginVerb = $ '.account a.verb'
   jukebox.on 'data.user.fake.changed', (val) ->
     if val is true
-      $loginVerb = 'login / register'
+      $loginVerb.innerText = 'login / register'
     if val is false
-      $loginVerb = 'logout'
+      $loginVerb.innerText = 'logout'
