@@ -6,6 +6,7 @@ html
       content='width=device-width,initial-scale=1')
     meta(name='apple-mobile-web-app-capable', content='yes')
     link(rel='stylesheet', href='jukebox.css')
+    script(src='//connect.soundcloud.com/sdk.js', async).SC
     script(src='jukebox.js', async)
   body
     //- address.
@@ -53,7 +54,7 @@ html
             form.chat-form
               input(type='text')
               input(type='submit', hidden)
-    article.modal
+    article.modal.login
       .row.clearfix
         form.user-form
           label
@@ -63,3 +64,22 @@ html
           label password
           input(type='password', name='password')
           input(type='submit', value='login / register').verb
+    article.modal.search
+      .row
+        .box
+          a.verb.cancel x
+          .input
+            input(type='text', name='search')
+      .row
+        .list
+          - for (var i = 0; i < 10; i++)
+            .song.clearfix
+              .half
+                .artist Artist
+                .cost
+                  .duration 6.42
+                  | 1 quarter
+              .half
+                .title Bassnectar - Heads Up (The Glitch Mob Remix) - Free DL
+                a.verb.enqueue queue
+          p.loading loading...

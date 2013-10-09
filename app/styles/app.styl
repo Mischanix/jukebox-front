@@ -48,6 +48,8 @@ body
   max-width 40em
   margin 0 auto
   background body_bg
+.row.ios-fix
+  margin 0
 
 address
   display none
@@ -57,6 +59,28 @@ address
 
 .verb:hover
   color lighten(cong_mid, 25%)
+
+.list
+  min-height 10em
+  max-height 20em
+  overflow hidden
+  overflow-y scroll
+  -webkit-overflow-scrolling touch
+  background-color darken(body_bg, 1.25%)
+  color darken(text, 50%)
+  &::scrollbar
+    width 0
+    height 0
+  &::-webkit-scrollbar
+    width 0
+    height 0
+
+.artist // sc is 60% from black, 40%(?) from their text
+  color lighten(text, 60%)
+
+.title
+  color darken(text, 20%)
+
 
 .clearfix
   zoom 1
@@ -117,10 +141,8 @@ header
     margin 0 0.5em
     padding 0.5em 0
 
-    .artist // sc is 60% from black, 40%(?) from their text
-      color lighten(text, 60%)
+    .artist
       font-size (7/8)em
-
       background-repeat no-repeat
       // phone
       background-image url(cloud-phone.png)
@@ -139,7 +161,6 @@ header
         background-size 51px 22px
 
     .title
-      color darken(text, 20%)
       height 2em
       overflow hidden
       text-overflow clip
@@ -158,16 +179,16 @@ header
     background input_bg
     margin 0 0 0.5em 0.5em
 
+  border_color = lighten(cong_dark, 60%)
+  indicator_color_1 = lighten(cong_dark, 90%)
+  indicator_color_2 = lighten(cong_dark, 85%)
   .progress
     margin 0 0.5em 0.5em mute_width + 1em
     height 2em
-    padding 1px
+    padding 1px 0 1px 1px
     position relative
-    background white
+    background indicator_color_1
 
-    border_color = lighten(cong_dark, 60%)
-    indicator_color_1 = lighten(cong_dark, 90%)
-    indicator_color_2 = lighten(cong_dark, 85%)
     .bracket
       display inline-block
       width 1em
@@ -181,27 +202,17 @@ header
         border-width 1px 0 1px 1px
       &.right
         float right
+        position relative
+        right 0
         border-width 1px 1px 1px 0
 
     .indicator
       height 2em
       position absolute
       top 1px
-      width 68.2152%
+      width 100%
       // ie fallback
-      background indicator_color_2
-      // stripes!
-      // ew, but the nib mixin for vendorizing this isn't working
-      background -webkit-repeating-linear-gradient(-30deg,
-        indicator_color_1 0,
-        indicator_color_1 2em,
-        indicator_color_2 2em,
-        indicator_color_2 4em)
-      background repeating-linear-gradient(-60deg,
-        indicator_color_1 0,
-        indicator_color_1 2em,
-        indicator_color_2 2em,
-        indicator_color_2 4em)
+      background header_bg
       z-index 1
 
     .status
@@ -258,18 +269,6 @@ header
   .list
     margin 0 0.5em 0 0.5em
     min-height (11 + 11/16)em // ~=iphone 5; script this proper
-    max-height 20em
-    overflow hidden
-    overflow-y scroll
-    -webkit-overflow-scrolling touch
-    background-color darken(body_bg, 1.25%)
-    color darken(text, 50%)
-    &::scrollbar
-      width 0
-      height 0
-    &::-webkit-scrollbar
-      width 0
-      height 0
     p
       margin 0
       margin-left (9/16)em
@@ -292,21 +291,21 @@ header
     input[type=text]
       width 100%
       padding 0 4px
-      // because fuck you that's why
       margin -1px 0 0 -5px
 
 // modal section
 .modal
-  visibility hidden
-  font-size 1.25em
+  display none
   background-color rgba(header_bg, 0.9)
-  z-index 3
-  padding-top 0.5em
+  z-index 20
   position fixed
   top 0
   left 0
   right 0
   bottom 0
+
+.modal.login
+  padding-top 0.5em
   .row
     background-color transparent
   .error
@@ -318,6 +317,7 @@ header
     padding 0.5em
     background-color body_bg
     max-width 10em
+    font-size 1.25em
     label
       font-size 0.75em
       margin-top 0.25em
@@ -337,3 +337,58 @@ header
       &.toggle
         background input_bg_toggle
         color verb_toggle
+
+.modal.search
+  .row
+    background-color body_bg
+  .box
+    padding 0.5em
+    button_width = 2em
+    a.cancel
+      width button_width
+      float left
+      border 1px solid input_border
+      background input_bg
+      margin 0 -1px
+      display block
+      padding-bottom 0.2em
+      text-align center
+    .input
+      margin-left button_width
+      margin-right 2px
+    input[type=text]
+      width 100%
+      padding 0
+  .list
+    max-height 30em
+    p, .song
+      margin 0.5em
+    .song
+      // idk?
+      border-top 1px solid darken(body_bg, 2.5%)
+      padding-top 0.25em
+      // end idk?
+      .artist
+        font-size 1.125em
+        display inline-block
+        margin-bottom 0.25em
+      .cost
+        font-size 1.125em
+        float right
+      .duration
+        display inline-block
+        float left
+        &:after
+          content '—'
+          margin 0 0.25em
+      .title
+        display inline-block
+        font-size 1.25em
+      .verb.enqueue
+        float right
+        display block
+        background-color input_bg
+        border 1px solid input_border
+        padding 0 0.25em 0.25em 0.25em
+        margin-top -1px
+        font-size 1.25em

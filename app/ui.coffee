@@ -67,10 +67,31 @@ jukebox.on 'ready', ->
           $chatlist.scrollTop += $chatlist.scrollHeight - scrollHeightPre
     null
 
+  # a copy of updateChat, minus the def/val diff for *listHeight and the
+  # spacing at the bottom
+  $searchlist = $ '.search .list'
+  updateSearch = ->
+    # adjust the height of the search results list
+    targetBottom = window.innerHeight
+    searchlistBounds = $searchlist.getBoundingClientRect()
+    deltaHeight = targetBottom - searchlistBounds.bottom
+    targetHeight = deltaHeight +
+      parseFloat (computedStyle $searchlist, 'height'), 10
+    if targetHeight > 0 # beware: value can be NaN
+      $searchlist.style.height = targetHeight + 'px'
+
   updateLayout = ->
     updateChat()
+    updateSearch()
   window.addEventListener 'resize', updateLayout
   updateLayout()
+
+  # margin 0 auto messes up when going from landscape to portrait on iOS.
+  # this is a suitable workaround
+  window.addEventListener 'orientationchange', (e) ->
+    ($ '.row').each (row) ->
+      row.classList.add 'ios-fix'
+      _.defer -> row.classList.remove 'ios-fix'
 
   # chat ui
   $chat = $ 'form.chat-form'
@@ -93,18 +114,18 @@ jukebox.on 'ready', ->
   # login ui
   $login = $ '.account .verb'
   $login.href = '#'
-  $modal = $ '.modal'
-  $modalRow = $ '.modal .row'
-  $loginForm = $ '.modal form'
-  $loginBtn = $ '.modal .verb'
+  $loginModal = $ '.modal.login'
+  $loginModalRow = $ '.modal.login .row'
+  $loginForm = $ '.modal.login form'
+  $loginBtn = $ '.modal.login .verb'
   $login.addEventListener 'click', (e) ->
     e.preventDefault()
     if true is jukebox.data 'user.fake'
       jukebox.emit 'login.show'
     else
       jukebox.emit 'logout'
-  $modal.addEventListener 'click', (e) ->
-    if e.target is $modal or e.target is $modalRow
+  $loginModal.addEventListener 'click', (e) ->
+    if e.target is $loginModal or e.target is $loginModalRow
       jukebox.emit 'login.hide'
   $loginForm.addEventListener 'submit', (e) ->
     e.preventDefault()
@@ -117,15 +138,15 @@ jukebox.on 'ready', ->
     ), 1000, { leading: yes, trailing: yes }
 
   jukebox.on 'login.show', ->
-    $modal.style.visibility = 'visible'
+    $loginModal.style.display = 'block'
   jukebox.on 'login.hide', ->
-    $modal.style.visibility = 'hidden'
+    $loginModal.style.display = 'none'
 
   jukebox.on 'login.error.show', (msg) ->
     msg or= 'login failed'
-    ($ '.modal .error').innerText = msg
+    ($ '.modal.login .error').innerText = msg
   jukebox.on 'login.error.hide', ->
-    ($ '.modal .error').innerText = ''
+    ($ '.modal.login .error').innerText = ''
 
   # account info ui
   $quarters = $ '.quarters'
@@ -144,3 +165,55 @@ jukebox.on 'ready', ->
 
   jukebox.on 'changed.data.user.nick', (nick) ->
     $chatbox.placeholder = nick + ':'
+
+  # playback ui
+  $progress = $ '.progress'
+  $indicator = $ '.indicator'
+  $elapsed = $ 'p.elapsed'
+  $total = $ 'p.total'
+  padLeft = (str, len) ->
+    if str.length < len
+      padLeft '0' + str, len
+    else
+      str
+  formatTime = (milliseconds) ->
+    seconds = Math.round milliseconds / 1000
+    minutes = Math.floor seconds / 60
+    seconds = seconds % 60
+    return (minutes.toString 10) + '.' + padLeft (seconds.toString 10), 2
+  _pos = -1
+  _dur = -1
+  lastPos = 0
+  stopLastAnimation = -> null
+  jukebox.on 'playback.progress', (pos, dur) ->
+    if _pos isnt Math.round pos / 1000
+      $elapsed.innerText = formatTime pos
+      _pos = Math.round pos / 1000
+    if _dur isnt dur
+      $total.innerText = formatTime dur
+      _dur = dur
+    # progress bar
+    if pos > lastPos
+      interval = pos - lastPos
+      stopLastAnimation()
+      do ->
+        startTime = Date.now()
+        animating = true
+        stopLastAnimation = -> animating = false
+        _.delay stopLastAnimation, interval
+        $progressWidth = parseFloat (computedStyle $progress, 'width'), 10
+        lastWidth = Math.floor 4 * $progressWidth * pos / dur
+        frame = ->
+          interpPos = Date.now() - startTime + pos
+          currWidth = Math.floor 4 * $progressWidth * interpPos / dur
+          if currWidth isnt lastWidth
+            lastWidth = currWidth
+            percent = ((100 * interpPos / dur).toString 10) + '%'
+            $indicator.style.width = percent
+          requestAnimationFrame frame if animating
+          null
+        frame()
+    if pos is dur
+      lastPos = -1
+    else
+      lastPos = pos
