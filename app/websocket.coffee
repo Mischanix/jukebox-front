@@ -38,7 +38,7 @@ jukebox.on 'connect', ->
       else
         restarting = false
       delay = 100 # ms
-      if Date.now() - jukebox.data 'ws.lastAttempt' > 20*1000
+      if 20*1000 < Date.now() - jukebox.data 'ws.lastAttempt'
         jukebox.data 'ws.delay', 100
       else
         delay = jukebox.data 'ws.delay'

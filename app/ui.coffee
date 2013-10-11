@@ -150,12 +150,20 @@ jukebox.on 'ready', ->
 
   # account info ui
   $quarters = $ '.quarters'
-  jukebox.on 'changed.data.user.quarters', (val) ->
+  quartersNomized = (val) ->
     val = val.toString 10
-    nominal = if val.length < 5 then 'quarters' else 'q'
-    nominal = 'quarter' if val is '1'
     val = 'no' if val is '0'
-    $quarters.innerText = val + ' ' + nominal
+    nominal = do ->
+      if val.length < 5
+        if val is '1'
+          'quarter'
+        else
+          'quarters'
+      else
+        'q'
+    val + ' ' + nominal
+  jukebox.on 'changed.data.user.quarters', (val) ->
+    $quarters.innerText = quartersNomized val
 
   jukebox.on 'changed.data.user.fake', (val) ->
     if val is true
@@ -217,3 +225,136 @@ jukebox.on 'ready', ->
       lastPos = -1
     else
       lastPos = pos
+
+  # search ui
+  $modalSearch = $ '.modal.search'
+  showSearch = ->
+    $modalSearch.style.display = 'block'
+    $searchLoading.innerText = ''
+    updateSearch()
+  hideSearch = ->
+    $modalSearch.style.display = 'none'
+    jukebox.data 'search.query', ''
+  $queueVerb = $ '.queue.verb'
+  $queueVerb.style.cursor = 'pointer'
+  $queueVerb.addEventListener 'click', (e) ->
+    e.preventDefault()
+    showSearch()
+  $modalSearch.addEventListener 'click', (e) ->
+    if e.target is $modalSearch
+      e.preventDefault()
+      hideSearch()
+  $searchCancel = $ '.modal.search .verb.cancel'
+  $searchCancel.addEventListener 'click', (e) ->
+    e.preventDefault()
+    hideSearch()
+
+  $searchInput = $ 'input[name=search]'
+  $searchInput.addEventListener 'keyup', _.debounce (->
+    jukebox.data 'search.query', $searchInput.value
+  ), 1000/3.5
+  jukebox.data 'search.query', ''
+
+  # search results list ui
+  $searchLoading = $ '.modal.search .loading'
+  jukebox.on 'changed.data.search.query', (query) ->
+    resetSearch()
+    if $searchInput.value isnt query
+      $searchInput.value = query
+    return if query is ''
+
+    pagesShown = []
+    pagesRequested = []
+    jukebox.on 'search.page', (page) ->
+      $searchLoading.style.display = 'block'
+      $searchLoading.innerText = 'loading...'
+      jukebox.emit 'search', query, page, (results) ->
+        if results is null
+          $searchLoading.innerText = 'no more results'
+          jukebox.removeEvent 'search.page.next'
+        else
+          $searchLoading.style.display = 'none'
+          allResults = jukebox.data 'search.results'
+          allResults[page] = results
+          jukebox.emit 'changed.data.search.results', allResults
+
+    jukebox.on 'changed.data.search.results', (results) ->
+      _.each results, (pageList, pageNum) ->
+        if pageList? and not pagesShown[pageNum] and shouldShowPage pageNum
+          beforeEl = _($ '.modal.search .song').foldr ((a, el) ->
+            if pageNum < parseInt el.dataset.page, 10 then el else a
+          ), null
+          if beforeEl is null
+            beforeEl = $searchLoading
+          _(pageList).map (o) ->
+            id: o.id
+            page: pageNum
+            link: o.permalink_url
+            artist: o.user.username
+            title: o.title
+            duration: formatTime o.duration
+            cost: do ->
+              val = queueCost o.duration
+              if _.isFinite val
+                quartersNomized val
+              else
+                'too long'
+            queueable: _.isFinite queueCost o.duration
+          .each (song) ->
+            jukebox.emit 'template.search_result', song, (str) ->
+              beforeEl.insertAdjacentHTML 'beforebegin', str
+              bindHandlers beforeEl.previousElementSibling
+          pagesShown[pageNum] = true
+      updateScrollbreak()
+
+    bindHandlers = (el) ->
+      $el = HTML.ify el
+      $enqueueButton = $el.query '.verb.enqueue'
+      if not _.isArray $enqueueButton
+        $el.addEventListener 'click', (e) ->
+          if e.target isnt $enqueueButton
+            e.preventDefault()
+            _.defer -> window.open $el.dataset.link, 'jukeboxPreview'
+        $enqueueButton.addEventListener 'click', ->
+          jukebox.emit 'enqueue', $el.dataset.id
+          hideSearch()
+
+
+    shouldShowPage = (pageNum) -> _.contains pagesRequested, pageNum
+    requestPage = (pageNum) ->
+      pagesRequested.push pageNum
+      if not (jukebox.data 'search.results')[pageNum]?
+        jukebox.once 'search.page.next', ->
+          requestPage pageNum + 1
+        jukebox.emit 'search.page', pageNum
+
+    requestPage 0
+
+  resetSearch = ->
+    jukebox.removeEvent 'changed.data.search.results'
+    jukebox.data 'search.results', []
+    ($ '.modal.search .song').each (el) -> el.remove()
+    jukebox.removeEvent 'search.page'
+    jukebox.removeEvent 'search.page.next'
+
+  $searchlist.addEventListener 'scroll', (e) ->
+    if $searchlist.scrollTop > jukebox.data 'search.scrollbreak'
+      jukebox.emit 'search.page.next'
+  updateScrollbreak = ->
+    allSongs = ($ '.modal.search .song')
+    if allSongs.length > 10
+      breakEl = allSongs[allSongs.length - 10]
+      scrollbreak = breakEl.getBoundingClientRect().top -
+        allSongs[0].getBoundingClientRect().top
+      jukebox.data 'search.scrollbreak', scrollbreak
+    else
+      jukebox.data 'search.scrollbreak', 1/0
+
+
+  queueCost = (duration) -> # milliseconds
+    if duration < 7.5*60*1000
+      1
+    else if duration < 15*60*1000
+      3
+    else
+      1/0

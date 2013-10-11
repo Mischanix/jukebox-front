@@ -65,15 +65,9 @@ address
   max-height 20em
   overflow hidden
   overflow-y scroll
-  -webkit-overflow-scrolling touch
   background-color darken(body_bg, 1.25%)
   color darken(text, 50%)
-  &::scrollbar
-    width 0
-    height 0
-  &::-webkit-scrollbar
-    width 0
-    height 0
+  -webkit-overflow-scrolling touch
 
 .artist // sc is 60% from black, 40%(?) from their text
   color lighten(text, 60%)
@@ -267,6 +261,12 @@ header
 // chat section
 .chat
   .list
+    &::scrollbar
+      width 0
+      height 0
+    &::-webkit-scrollbar
+      width 0
+      height 0
     margin 0 0.5em 0 0.5em
     min-height (11 + 11/16)em // ~=iphone 5; script this proper
     p
@@ -392,3 +392,8 @@ header
         padding 0 0.25em 0.25em 0.25em
         margin-top -1px
         font-size 1.25em
+    .loading
+      display none
+      text-align center
+      color lighten(text, 50%)
+      font-size 1.125em

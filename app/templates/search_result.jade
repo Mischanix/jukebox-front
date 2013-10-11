@@ -1,0 +1,10 @@
+.song.clearfix(data-page=page, data-id=id, data-link=link)
+  .half
+    .artist= artist
+    .cost
+      .duration= duration
+      = cost
+  .half
+    .title= title
+    - if (queueable)
+      a.verb.enqueue queue

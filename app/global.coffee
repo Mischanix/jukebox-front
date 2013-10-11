@@ -34,8 +34,6 @@ window.$ = HTML.query.bind HTML
       jukebox.emit evt, result
       result[name] ? result
 
-  window.onerror = (e) -> jukebox.emit 'notification', e.message
-
   for k, v of {
     'ws.url': 'ws://10.0.0.69:3343'
   } then jukebox.data k, v
