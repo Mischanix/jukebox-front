@@ -144,9 +144,9 @@ jukebox.on 'ready', ->
 
   jukebox.on 'login.error.show', (msg) ->
     msg or= 'login failed'
-    ($ '.modal.login .error').innerText = msg
+    ($ '.modal.login .error').textContent = msg
   jukebox.on 'login.error.hide', ->
-    ($ '.modal.login .error').innerText = ''
+    ($ '.modal.login .error').textContent = ''
 
   # account info ui
   $quarters = $ '.quarters'
@@ -163,13 +163,13 @@ jukebox.on 'ready', ->
         'q'
     val + ' ' + nominal
   jukebox.on 'changed.data.user.quarters', (val) ->
-    $quarters.innerText = quartersNomized val
+    $quarters.textContent = quartersNomized val
 
   jukebox.on 'changed.data.user.fake', (val) ->
     if val is true
-      $login.innerText = 'login / register'
+      $login.textContent = 'login / register'
     if val is false
-      $login.innerText = 'logout'
+      $login.textContent = 'logout'
 
   jukebox.on 'changed.data.user.nick', (nick) ->
     $chatbox.placeholder = nick + ':'
@@ -195,10 +195,10 @@ jukebox.on 'ready', ->
   stopLastAnimation = -> null
   jukebox.on 'playback.progress', (pos, dur) ->
     if _pos isnt Math.round pos / 1000
-      $elapsed.innerText = formatTime pos
+      $elapsed.textContent = formatTime pos
       _pos = Math.round pos / 1000
     if _dur isnt dur
-      $total.innerText = formatTime dur
+      $total.textContent = formatTime dur
       _dur = dur
     # progress bar
     if pos > lastPos
@@ -226,11 +226,37 @@ jukebox.on 'ready', ->
     else
       lastPos = pos
 
+  $playbackArtist = $ '.playback .song .artist'
+  jukebox.on 'changed.data.playing.artist', (val) ->
+    $playbackArtist.textContent = val
+
+  $playbackTitle = $ '.playback .song .title'
+  jukebox.on 'changed.data.playing.title', (val) ->
+    $playbackTitle.textContent = val
+
+  $playbackAnchor = $ '.playback .song'
+  jukebox.on 'changed.data.playing.link', (val) ->
+    $playbackAnchor.href = val
+    $playbackAnchor.target = 'jukebox_playing'
+
+  $muteBtn = $ '.mute.verb'
+  jukebox.on 'changed.data.player.ready', (val) ->
+    if val is true
+      $muteBtn.textContent = 'mute'
+    else
+      $muteBtn.textContent = 'unmute'
+
+  $muteBtn.addEventListener 'click', (e) ->
+    e.preventDefault()
+    jukebox.emit 'player.mute'
+  $muteBtn.href = '#'
+
   # search ui
   $modalSearch = $ '.modal.search'
   showSearch = ->
     $modalSearch.style.display = 'block'
-    $searchLoading.innerText = ''
+    $searchLoading.textContent = ''
+    $searchInput.focus()
     updateSearch()
   hideSearch = ->
     $modalSearch.style.display = 'none'
@@ -267,10 +293,10 @@ jukebox.on 'ready', ->
     pagesRequested = []
     jukebox.on 'search.page', (page) ->
       $searchLoading.style.display = 'block'
-      $searchLoading.innerText = 'loading...'
+      $searchLoading.textContent = 'loading...'
       jukebox.emit 'search', query, page, (results) ->
         if results is null
-          $searchLoading.innerText = 'no more results'
+          $searchLoading.textContent = 'no more results'
           jukebox.removeEvent 'search.page.next'
         else
           $searchLoading.style.display = 'none'
@@ -286,7 +312,9 @@ jukebox.on 'ready', ->
           ), null
           if beforeEl is null
             beforeEl = $searchLoading
-          _(pageList).map (o) ->
+          _(pageList).filter (o) ->
+            o.streamable
+          .map (o) ->
             id: o.id
             page: pageNum
             link: o.permalink_url
@@ -348,6 +376,7 @@ jukebox.on 'ready', ->
         allSongs[0].getBoundingClientRect().top
       jukebox.data 'search.scrollbreak', scrollbreak
     else
+      jukebox.emit 'search.page.next'
       jukebox.data 'search.scrollbreak', 1/0
 
 

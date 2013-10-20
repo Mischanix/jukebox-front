@@ -4,4 +4,5 @@ jukebox.on 'chat.send', (message) ->
     jukebox.emit 'chat.show', jukebox.data('user.nick'), message
 
 jukebox.on 'net.chat.receive', (data) ->
-  jukebox.emit 'chat.show', data.nick, data.message
+  if data.nick isnt jukebox.data 'user.nick'
+    jukebox.emit 'chat.show', data.nick, data.message
