@@ -15,7 +15,6 @@ jukebox.on 'connect', ->
     ws.send JSON.stringify data
 
   ws.addEventListener 'message', (e) ->
-    console.log e.data
     data = JSON.parse e.data
     type = data.type or 'unknown'
     jukebox.emit 'net.' + type, data

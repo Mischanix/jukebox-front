@@ -216,12 +216,12 @@ jukebox.on 'ready', ->
           currWidth = Math.floor 4 * $progressWidth * interpPos / dur
           if currWidth isnt lastWidth
             lastWidth = currWidth
-            percent = ((100 * interpPos / dur).toString 10) + '%'
+            percent = (Math.min(100, 100 * interpPos / dur).toString 10) + '%'
             $indicator.style.width = percent
           requestAnimationFrame frame if animating
           null
         frame()
-    if pos is dur
+    if pos >= dur
       lastPos = -1
     else
       lastPos = pos
